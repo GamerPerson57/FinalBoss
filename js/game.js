@@ -27,6 +27,11 @@ var mouse = { x: 0, y: 0 };
 		{ label: "Back to Menu", x: canvas.width/2, y: canvas.height/2 + 300, width: 220, height: 50 }
 	];
 
+	var gameOverButtons = [
+		{ label: "Retry",    x: canvas.width/2, y: canvas.height/2,        width: 160, height: 40 },
+		{ label: "Return to Menu", x: canvas.width/2, y: canvas.height/2 + 60,   width: 160, height: 40 }
+	];
+
 	canvas.addEventListener("click", function(e) {
 		var rect = canvas.getBoundingClientRect();
 		mouse.x = e.clientX - rect.left;
@@ -48,6 +53,19 @@ var mouse = { x: 0, y: 0 };
 			}
 			});
 		}
+
+		else if (currentState == 3) {
+			gameOverButtons.forEach(function(btn) {
+			if (isClickingButton(btn, mouse)) {
+				if (btn.label == "Return to Menu") currentState = 0;
+				if (btn.label == "Retry") 
+				{ 
+					resetGame(); 
+					currentState = 2; 
+				}
+			}
+			});
+		}
 	});
 
 	canvas.addEventListener("mousemove", function(e) {
@@ -63,38 +81,80 @@ var mouse = { x: 0, y: 0 };
 	var platform0 = new GameObject();
 		platform0.height = 50;
 		platform0.width = 150;
-		platform0.x = platform0.width/2;
-		platform0.y = canvas.height - platform0.height/2;
-		platform0.color = "#0012b3";
+		platform0.x = 75;
+		platform0.y = 775;
+		platform0.color = "#5c00b3";
 	
 	var platform1 = new GameObject();
 		platform1.height = 50;
-		platform1.width = 1000;
-		platform1.x = platform1.width/2;
-		platform1.y = canvas.height - 775;
-		platform1.color = "#006b6b";
+		platform1.width = 150;
+		platform1.x = 600;
+		platform1.y = 50;
+		platform1.color = "#5c00b3";
 
 	var platform2 = new GameObject();
 		platform2.width = 100;
 		platform2.height = 50;
-		platform2.x = canvas.width - 700;
-		platform2.y = canvas.height - 100;
-		platform2.color = "#208100";
+		platform2.x = 200;
+		platform2.y = 650;
+		platform2.color = "#5c00b3";
 
 	
 	var platform3 = new GameObject();
-		platform3.width = 100;
+		platform3.width = 150;
 		platform3.height = 50;
-		platform3.x = platform0.width/2 + 50;
-		platform3.y = canvas.height - 300;
-		platform3.color = "#580081";
+		platform3.x = 75;
+		platform3.y = 400;
+		platform3.color = "#5c00b3";
 
 	var platform4 = new GameObject();
-		platform4.width = 400;
+		platform4.width = 300;
 		platform4.height = 50;
-		platform4.x = platform0.width/2 + 725;
-		platform4.y = canvas.height - 500;
-		platform4.color = "#810047";
+		platform4.x = 950;
+		platform4.y = 350;
+		platform4.color = "#5c00b3";
+
+	var platform5 = new GameObject();
+		platform5.width = 400;
+		platform5.height = 50;
+		platform5.x = 475;
+		platform5.y = 775;
+		platform5.color = "#5c00b3";
+
+	var platform6 = new GameObject();
+		platform6.width = 200;
+		platform6.height = 50;
+		platform6.x = 900;
+		platform6.y = 775;
+		platform6.color = "#5c00b3";
+
+	var platform7 = new GameObject();
+		platform7.width = 150;
+		platform7.height = 50;
+		platform7.x = 50;
+		platform7.y = 50;
+		platform7.color = "#5c00b3";
+
+	var platform8 = new GameObject();
+		platform8.width = 150;
+		platform8.height = 50;
+		platform8.x = 350;
+		platform8.y = 50;
+		platform8.color = "#5c00b3";
+
+	var platform9 = new GameObject();
+		platform9.width = 150;
+		platform9.height = 50;
+		platform9.x = 850;
+		platform9.y = 50;
+		platform9.color = "#5c00b3";
+
+	var platform10 = new GameObject();
+		platform10.width = 500;
+		platform10.height = 50;
+		platform10.x = 550;
+		platform10.y = 350;
+		platform10.color = "#000000";
 
 	
 
@@ -110,18 +170,18 @@ var mouse = { x: 0, y: 0 };
 	// Door(s)
 	var door0 = new GameObject();
 		door0.width = 100;
-		door0.height = 200;
+		door0.height = 150;
 		door0.x = canvas.width - 50;
-		door0.y = canvas.height - 200;
-		door0.color = "#535032"
+		door0.y = canvas.height - 125;
+		door0.color = "#535032";
 
 	// Key(s)
 	var key0 = new GameObject();
 		key0.width = 50;
 		key0.height = 50;
-		key0.x = 300;
-		key0.y = canvas.height - 125;
-		key0.color = "#b8a800"
+		key0.x = 950;
+		key0.y = 300;
+		key0.color = "#b8a800";
 
 
 //  |-------Other Variables-------|
@@ -158,9 +218,14 @@ var mouse = { x: 0, y: 0 };
 
 	// Jump Boost
 	var jumpBoost = false;
-	var chargeTimer = 1;   // 3 seconds to charge
+	var boostCooldown = false;
+	var isBoosting = false;
+	var chargeTimer = 1;   
 	var chargeTimerMax = 1;
-	var chargePower = 10;   
+	var chargePower = 6;   
+
+	// Death
+	var isDead = false;
 
 	interval = 1000/60;
 	timer = setInterval(animate, interval);
@@ -203,7 +268,7 @@ function animate()
 	{
 		// game
 		player.vx *= fX;
-		player.vy *= fY;
+		// player.vy *= fY;
 		
 		player.vy += gravity;
 		
@@ -212,27 +277,33 @@ function animate()
 
 
 		// Collisions
-		[platform0, platform1, platform2, platform3, platform4].forEach(p => platformCollision(p, player));
+		[platform0, platform1, platform2, platform3, platform4, platform5, platform6, platform7, platform8, platform9, door0].forEach(p => platformCollision(p, player));
 		canvasCollision(player);
-	
+
+		checkDeathZones(player);   
+		if (isDead) { currentState = 3; return; }
+
 		// Door proximity
 		isTouchingDoor = isTouching(door0, player);
 		while (door0.hitTestPoint(player.right())) 
 		{ 
 			player.x--; player.vx = 0; 
 		}
+
+		isTouchingItem = isTouching(key0, player);
+
 		
 		// Drawing
-		[platform0, platform1, platform2, platform3, platform4, player].forEach(obj => obj.drawRect());
-
+		[platform0, platform1, platform2, platform3, platform4, platform5, platform6, platform7, platform8, platform9, platform10, door0, player].forEach(obj => obj.drawRect());
+		[key0].forEach(obj => obj.drawCircle());
 
 		//  |-------Controls & Actions-------|
 
 		// ---> Jumping
-		if(w && player.canJump && player.vy ==0)
+		if(w && player.canJump && !isBoosting)  // add !isBoosting here
 		{
 			player.canJump = false;
-			player.vy += player.jumpHeight;
+			player.vy += gravity > 0 ? player.jumpHeight : -player.jumpHeight;
 		}
 
 		// ---> Move Side to Side
@@ -292,19 +363,13 @@ function animate()
 			gravityCooldown = true;
 
 			isGravity = !isGravity;
-			
-			if (isGravity == true)
-			{
-				gravity = 10;
-			}
-			if (isGravity == false) 
-			{
-				gravity = -10;
-			}
+    		gravity = isGravity ? 2 : -2;
+			player.vy = 0;        // kill existing vertical momentum
+  		  	player.canJump = false;
 
-			setTimeout(() => 
-			{
+			setTimeout(() => {
 				gravityCooldown = false;
+				gravity = isGravity ? 1 : -1; 
 			}, 3000);
 
 		}
@@ -365,32 +430,44 @@ function animate()
 		// ---> Jump Boost
 		if (z) 
 		{
-			if (!jumpBoost) 
+			if (!jumpBoost && !boostCooldown)
 			{
 				chargeTimer -= 1/60;
 
 				if (chargeTimer <= 0) 
 				{
-					player.vy = -(chargePower * 5);
+					player.vy = (gravity > 0 ? -1 : 1) * (chargePower * 5);
 					jumpBoost = true;
-					chargeTimer = 3;
+					isBoosting = true;             // disable regular jump
+					boostCooldown = true;
+					chargeTimer = chargeTimerMax;
+
+					setTimeout(() => {
+						boostCooldown = false;
+					}, 2000);
 				}
 			}
 		} 
-
 		else 
 		{
-			if (!jumpBoost && chargeTimer < 3) 
+			if (!jumpBoost && !boostCooldown && chargeTimer < chargeTimerMax)
 			{
 				var chargePercent = (chargeTimerMax - chargeTimer) / chargeTimerMax;
-				player.vy = -(chargePower * 5 * chargePercent);
+				player.vy = (gravity > 0 ? -1 : 1) * (chargePower * 5 * chargePercent);
 				chargeTimer = chargeTimerMax;
 				jumpBoost = true;
+				isBoosting = true;                 // disable regular jump
+				boostCooldown = true;
+
+				setTimeout(() => {
+					boostCooldown = false;
+				}, 2000);
 			}
 			
 			if (player.canJump) 
 			{
 				jumpBoost = false;
+				isBoosting = false;                // re-enable regular jump on landing
 			}
 		}
 
@@ -407,5 +484,11 @@ function animate()
 
 	states[3] = function() 
 	{
-		// Game Over Screen
+		// Title
+		context.fillStyle = "black";
+		context.font = "40px Arial";
+		context.textAlign = "center";
+		context.fillText("Game Over!", canvas.width/2, canvas.height/2 - 80);
+
+		drawButtons(gameOverButtons, mouse);
 	}

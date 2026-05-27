@@ -15,7 +15,7 @@ function GameObject(obj)
 
 	//whether or not the object can jump
 	this.canJump = false;
-	this.jumpHeight = -25;
+	this.jumpHeight = -20;
 
     //whether or not the player is dashing
     this.isDashing = false;
