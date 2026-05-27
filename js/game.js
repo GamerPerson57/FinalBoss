@@ -56,14 +56,18 @@ var mouse = { x: 0, y: 0 };
 
 		else if (currentState == 3) {
 			gameOverButtons.forEach(function(btn) {
-			if (isClickingButton(btn, mouse)) {
-				if (btn.label == "Return to Menu") currentState = 0;
-				if (btn.label == "Retry") 
-				{ 
-					resetGame(); 
-					currentState = 2; 
+				if (isClickingButton(btn, mouse)) {
+					if (btn.label == "Return to Menu") 
+					{ 
+						resetGame();
+						currentState = 0; 
+					}
+					if (btn.label == "Retry") 
+					{ 
+						resetGame(); 
+						currentState = 2; 
+					}
 				}
-			}
 			});
 		}
 	});
