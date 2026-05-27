@@ -14,7 +14,7 @@ var mouse = { x: 0, y: 0 };
 
 //  |-------Game States-------|
 
-	var currentState = 0;
+	var currentState = 2;
 	var states = [];
 
 //  |-------Start Menu-------|
@@ -61,30 +61,47 @@ var mouse = { x: 0, y: 0 };
 
 	// Platform(s)
 	var platform0 = new GameObject();
-		platform0.width = 1000;
+		platform0.height = 50;
+		platform0.width = 150;
 		platform0.x = platform0.width/2;
 		platform0.y = canvas.height - platform0.height/2;
-		platform0.color = "#66ff33";
+		platform0.color = "#0012b3";
 	
 	var platform1 = new GameObject();
+		platform1.height = 50;
 		platform1.width = 1000;
 		platform1.x = platform1.width/2;
-		platform1.y = canvas.height/2 - 350;
-		platform1.color = "#50c42a";
+		platform1.y = canvas.height - 775;
+		platform1.color = "#006b6b";
 
 	var platform2 = new GameObject();
-		platform2.width = 200;
-		platform2.height = 400;
-		platform2.x = canvas.width - 500;
-		platform2.y = canvas.height - 300;
-		platform2.color = "#264d19";
+		platform2.width = 100;
+		platform2.height = 50;
+		platform2.x = canvas.width - 700;
+		platform2.y = canvas.height - 100;
+		platform2.color = "#208100";
+
+	
+	var platform3 = new GameObject();
+		platform3.width = 100;
+		platform3.height = 50;
+		platform3.x = platform0.width/2 + 50;
+		platform3.y = canvas.height - 300;
+		platform3.color = "#580081";
+
+	var platform4 = new GameObject();
+		platform4.width = 400;
+		platform4.height = 50;
+		platform4.x = platform0.width/2 + 725;
+		platform4.y = canvas.height - 500;
+		platform4.color = "#810047";
 
 	
 
 	// Player(s)
 	var player = new GameObject();
-		player.width = 100;
-		player.height = 100;
+		player.width = 50;
+		player.height = 50;
 		player.x = 100;
 		player.y = canvas.height - platform0.height - player.height/2;
 		player.color = "red";
@@ -195,7 +212,7 @@ function animate()
 
 
 		// Collisions
-		[platform0, platform2].forEach(p => platformCollision(p, player));
+		[platform0, platform1, platform2, platform3, platform4].forEach(p => platformCollision(p, player));
 		canvasCollision(player);
 	
 		// Door proximity
@@ -206,7 +223,7 @@ function animate()
 		}
 		
 		// Drawing
-		[platform0, platform2, player].forEach(obj => obj.drawRect());
+		[platform0, platform1, platform2, platform3, platform4, player].forEach(obj => obj.drawRect());
 
 
 		//  |-------Controls & Actions-------|
@@ -278,11 +295,11 @@ function animate()
 			
 			if (isGravity == true)
 			{
-				gravity = 1;
+				gravity = 10;
 			}
 			if (isGravity == false) 
 			{
-				gravity = -1;
+				gravity = -10;
 			}
 
 			setTimeout(() => 
