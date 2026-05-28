@@ -151,6 +151,7 @@
 		jumpBoost     = false;
 		boostCooldown = false;
 		isBoosting    = false;
+		isCharging = false;
 		chargeTimer   = chargeTimerMax;
 
 		isHoldingKey    = false;

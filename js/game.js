@@ -210,6 +210,7 @@ var mouse = { x: 0, y: 0 };
 	
 	// Gravity
 	var gravity = 1;
+	var baseGravity = 1;
 	var isGravity = true;
 	
 	// Cooldowns
@@ -245,6 +246,7 @@ var mouse = { x: 0, y: 0 };
 	var jumpBoost = false;
 	var boostCooldown = false;
 	var isBoosting = false;
+	var isCharging = false;
 	var chargeTimer = 1;   
 	var chargeTimerMax = 1;
 	var chargePower = 6;   
@@ -321,7 +323,7 @@ function animate()
 		//  |-------Controls & Actions-------|
 
 		// ---> Jumping
-		if(w && player.canJump && !isBoosting)  // add !isBoosting here
+		if(w && player.canJump && !isBoosting && !isCharging)
 		{
 			player.canJump = false;
 			player.vy += gravity > 0 ? player.jumpHeight : -player.jumpHeight;
@@ -384,15 +386,13 @@ function animate()
 			gravityCooldown = true;
 
 			isGravity = !isGravity;
-    		gravity = isGravity ? 2 : -2;
-			player.vy = 0;        // kill existing vertical momentum
-  		  	player.canJump = false;
+			gravity = isGravity ? baseGravity : -baseGravity;  // no spike, go straight to normal
+			player.vy = 0;
+			player.canJump = false;
 
 			setTimeout(() => {
 				gravityCooldown = false;
-				gravity = isGravity ? 1 : -1; 
 			}, 3000);
-
 		}
 
 		if(!g) 
@@ -466,6 +466,7 @@ function animate()
 		// ---> Jump Boost
 		if (z) 
 		{
+			isCharging = true;  // block jumping while charging
 			if (!jumpBoost && !boostCooldown)
 			{
 				chargeTimer -= 1/60;
@@ -473,8 +474,9 @@ function animate()
 				if (chargeTimer <= 0) 
 				{
 					player.vy = (gravity > 0 ? -1 : 1) * (chargePower * 5);
-					jumpBoost = true;
-					isBoosting = true;             // disable regular jump
+					jumpBoost   = true;
+					isBoosting  = true;
+					isCharging  = false;  // add this — boost has fired, no longer charging
 					boostCooldown = true;
 					chargeTimer = chargeTimerMax;
 
@@ -503,7 +505,8 @@ function animate()
 			if (player.canJump) 
 			{
 				jumpBoost = false;
-				isBoosting = false;                // re-enable regular jump on landing
+				isBoosting = false;  
+				isCharging = false;
 			}
 		}
 	}
