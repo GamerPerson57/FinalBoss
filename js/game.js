@@ -14,7 +14,7 @@ var mouse = { x: 0, y: 0 };
 
 //  |-------Game States-------|
 
-	var currentState = 2;
+	var currentState = 0;
 	var states = [];
 
 //  |-------Start Menu-------|
@@ -31,6 +31,11 @@ var mouse = { x: 0, y: 0 };
 		{ label: "Retry",    x: canvas.width/2, y: canvas.height/2,        width: 160, height: 40 },
 		{ label: "Return to Menu", x: canvas.width/2, y: canvas.height/2 + 60,   width: 160, height: 40 }
 	];
+
+	var winScreenButtons = [
+		{ label: "Play Again?",    x: canvas.width/2, y: canvas.height/2,        width: 160, height: 40 },
+		{ label: "Return to Menu", x: canvas.width/2, y: canvas.height/2 + 60,   width: 160, height: 40 }
+	]
 
 	canvas.addEventListener("click", function(e) {
 		var rect = canvas.getBoundingClientRect();
@@ -67,6 +72,15 @@ var mouse = { x: 0, y: 0 };
 						resetGame(); 
 						currentState = 2; 
 					}
+				}
+			});
+		}
+
+		else if (currentState == 4) {
+			winScreenButtons.forEach(function(btn) {
+				if (isClickingButton(btn, mouse)) {
+					if (btn.label == "Return to Menu") { resetGame(); currentState = 0; }
+					if (btn.label == "Play Again?")    { resetGame(); currentState = 2; }
 				}
 			});
 		}
@@ -216,9 +230,16 @@ var mouse = { x: 0, y: 0 };
 	// Holding Items
 	var isHoldingKey = false;
 
-	// Message 
-	var interactMessage = "";
-	var messageTimer = 0;
+	// Messages
+	var keyMessage      = "";
+	var keyMessageTimer = 0;
+	var keyMessageX     = 0;
+	var keyMessageY     = 0;
+
+	var doorMessage      = "";
+	var doorMessageTimer = 0;
+	var doorMessageX     = 0;
+	var doorMessageY     = 0;
 
 	// Jump Boost
 	var jumpBoost = false;
@@ -250,7 +271,7 @@ function animate()
 		context.fillStyle = "black";
 		context.font = "40px Arial";
 		context.textAlign = "center";
-		context.fillText("My Game", canvas.width/2, canvas.height/2 - 80);
+		context.fillText("Gravity is Key", canvas.width/2, canvas.height/2 - 80);
 
 		drawButtons(menuButtons, mouse);
 	}
@@ -289,17 +310,13 @@ function animate()
 
 		// Door proximity
 		isTouchingDoor = isTouching(door0, player);
-		while (door0.hitTestPoint(player.right())) 
-		{ 
-			player.x--; player.vx = 0; 
-		}
 
 		isTouchingItem = isTouching(key0, player);
 
 		
 		// Drawing
 		[platform0, platform1, platform2, platform3, platform4, platform5, platform6, platform7, platform8, platform9, platform10, door0, player].forEach(obj => obj.drawRect());
-		[key0].forEach(obj => obj.drawCircle());
+		key0.drawCircle();
 
 		//  |-------Controls & Actions-------|
 
@@ -385,50 +402,65 @@ function animate()
 
 		
 		// ---> Interaction
+
+		// Pick up key
+		if (x && !xPressed && isTouchingItem && !isHoldingKey) 
+		{
+			xPressed        = true;
+			isHoldingKey    = true;
+			keyMessageX     = key0.x - 40;
+			keyMessageY     = key0.y - 40;
+			key0.x          = -1000;
+			key0.y          = -1000;
+			keyMessage      = "You picked up a key!";
+			keyMessageTimer = 300;
+		}
+
+		// Interact with door
 		if (x && !xPressed && isTouchingDoor)  
 		{
 			xPressed = true;
 
-			if (isHoldingKey == true) 
+			if (isHoldingKey) 
 			{
-				// clear the door
-				console.log("Player does have the key.");
-				
-				door0.x = 1000;
-				door0.y = 1000;
+				door0.x = -1000;
+				door0.y = -1000;
+				currentState = 4;
+				return;
 			}
-
-			if (isHoldingKey == false) 
+			else
 			{
-				// print text
-				console.log("Player does not have the key.");
-
-				interactMessage = "You need a key to open this door.";
-				messageTimer = 300;
-			}
-		}
-		
-		if (x && !xPressed && isTouchingItem && !isHoldingKey) 
-		{
-			xPressed = true;
-			isHoldingKey = true;
-
-			if (isHoldingKey == true) 
-			{
-				// clear the door
-				console.log("Player picked up key.");
-				
-				key0.x = 1000;
-				key0.y = 1000;
-
-				interactMessage = "You picked up a key!";
-				messageTimer = 300;
+				doorMessage      = "You need a key to open this door.";
+				doorMessageTimer = 300;
+				doorMessageX     = door0.x - 175;
+				doorMessageY     = door0.y - 40;
 			}
 		}
 
-		if (!x) 
+		if (!x) { xPressed = false; }
+
+		// Draw key message
+		if (keyMessageTimer > 0) 
 		{
-			xPressed = false;
+			context.save();
+			context.fillStyle = "black";
+			context.font = "16px Arial";
+			context.textAlign = "center";
+			context.fillText(keyMessage, keyMessageX, keyMessageY);
+			context.restore();
+			keyMessageTimer--;
+		}
+
+		// Draw door message
+		if (doorMessageTimer > 0) 
+		{
+			context.save();
+			context.fillStyle = "black";
+			context.font = "16px Arial";
+			context.textAlign = "center";
+			context.fillText(doorMessage, doorMessageX, doorMessageY);
+			context.restore();
+			doorMessageTimer--;
 		}
 
 		// ---> Jump Boost
@@ -474,25 +506,26 @@ function animate()
 				isBoosting = false;                // re-enable regular jump on landing
 			}
 		}
-
-
-		if (messageTimer > 0) 
-		{
-			context.fillStyle = "black";
-			context.font = "16px Arial";
-			context.textAlign = "center";
-			context.fillText(interactMessage, canvas.width/2, canvas.height/2 + 40);
-			messageTimer--;
-		}
 	}
 
 	states[3] = function() 
 	{
-		// Title
+		// Game Over Screen
 		context.fillStyle = "black";
 		context.font = "40px Arial";
 		context.textAlign = "center";
 		context.fillText("Game Over!", canvas.width/2, canvas.height/2 - 80);
 
 		drawButtons(gameOverButtons, mouse);
+	}
+
+	states[4] = function() 
+	{
+		// Win Screen
+		context.fillStyle = "black";
+		context.font = "40px Arial";
+		context.textAlign = "center";
+		context.fillText("You Win!", canvas.width/2, canvas.height/2 - 80);
+
+		drawButtons(winScreenButtons, mouse);
 	}

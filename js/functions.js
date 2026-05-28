@@ -136,41 +136,39 @@
 
 	function resetGame()
 	{
-		// Reset player
 		player.x  = 100;
 		player.y  = canvas.height - platform0.height - player.height/2;
 		player.vx = 0;
 		player.vy = 0;
 		player.canJump = false;
 
-		// Reset gravity
-		gravity   = 1;
-		isGravity = true;
+		gravity         = 1;
+		isGravity       = true;
 		gravityCooldown = false;
-
-		// Reset dash
 		dashCooldown    = false;
 		player.isDashing = false;
 
-		// Reset boost
-		jumpBoost    = false;
+		jumpBoost     = false;
 		boostCooldown = false;
-		isBoosting   = false;
-		chargeTimer  = chargeTimerMax;
+		isBoosting    = false;
+		chargeTimer   = chargeTimerMax;
 
-		// Reset interactables
-		isHoldingKey  = false;
-		isTouchingDoor = false;
-		isTouchingItem = false;
-		messageTimer  = 0;
-		interactMessage = "";
+		isHoldingKey    = false;
+		isTouchingDoor  = false;
+		isTouchingItem  = false;
+		keyMessage       = "";
+		keyMessageTimer  = 0;
+		keyMessageX      = 0;
+		keyMessageY      = 0;
+		doorMessage      = "";
+		doorMessageTimer = 0;
+		doorMessageX     = 0;
+		doorMessageY     = 0;
 
-		// Reset key and door
-		key0.x  = 950;  key0.y  = 300;
+		key0.x  = 950;   key0.y  = 300;
 		door0.x = canvas.width - 50;
 		door0.y = canvas.height - 125;
 
-		// Reset death
 		isDead = false;
 	}
 
